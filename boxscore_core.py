@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 from urllib2 import urlopen
+from tabulate import tabulate
 import re
 
 class boxscore():
@@ -41,6 +42,15 @@ class boxscore():
 							tmp[k] = pdata[i+1].string
 						self.player_data[name] = tmp
 
+	def print_table(self):
+		data = []
+		for player in self.player_data:
+			row = [player]
+			for k in self.player_data[player]:
+				row.append(self.player_data[player][k])
+			data.append(row)
+		print tabulate(data)
+
 
 
 
@@ -51,5 +61,7 @@ if __name__ == '__main__':
 	print boxscore_LAL.player_data
 
 	print boxscore_LAL.player_data['Kobe Bryant']
+
+	boxscore_LAL.print_table()
 
 
