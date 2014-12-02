@@ -55,7 +55,10 @@ class Roster():
                 if i[0] in exceptions:
                     self.team_dict['{}'.format(i[0])] = str(i[1]) + " " + str(i[2])
                 else:
-                    self.team_dict['{} {}'.format(i[0],i[1])] = i[2]
+                    if i[2] == 'clippers':
+                        self.team_dict['{} {} 2'.format(i[0],i[1])] = i[2]
+                    else:
+                        self.team_dict['{} {}'.format(i[0],i[1])] = i[2]
         self.team_rosterurl_dict = {}
         for i in self.team_dict.keys():
             for j in teams_raw:
