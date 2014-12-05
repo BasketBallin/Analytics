@@ -34,11 +34,12 @@ class boxscore():
 				if player['class'][0] == '':
 					pdata = player.findAll('td')
 					name = pdata[0].string
-					if pdata[1].string != "Did Not Play":
+					#if pdata[1].string != "Did Not Play":
+					if len(pdata) > 2:
 						tmp = player_data.get(name, {})
 						for i,k in enumerate(fields):
 							if pdata[i+1] == None:
-								pdata[i+1] = 0
+								pdata[i+1] = 'None'
 							tmp[k] = pdata[i+1].string
 						self.player_data[name] = tmp
 
