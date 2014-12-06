@@ -191,6 +191,7 @@ class Roster():
             team = [i for i in self.team_dict.keys() if self.team_dict[i] == self.team.lower()][0]
             return self.team_roster_dict[team]
 
+
 if __name__ == '__main__':
     celtics = Roster(team='Celtics')
     celtics_roster = celtics.get_roster()
