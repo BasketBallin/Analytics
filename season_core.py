@@ -5,7 +5,6 @@ import zlib
 import re
 
 class Season():
-
 	def __init__(self, year=None):
 		self.year = year
         	assert self.year is not None, "Must specify an Season."
@@ -39,5 +38,5 @@ class Season():
 		return boxscore_links
 
 if __name__ == '__main__':
-	season_2014 = Season(year=2014)
-	print season_2014.game_links
+    season_2014 = Season(year=2014)
+    print season_2014.game_links
