@@ -35,4 +35,16 @@ class Scrape(object):
 	
         return boxscore_links
 
+    def _get_boxscore(self,game_url):
+        """
+        Private function which retrieves all data for a given game_url.
+        """
+        
+        # Make sure that a game has been specified
+        self.game_url = game_url
+        assert self.game_url is not None, "Must specify a game."
+
+        # Download Boxscore
+        
+        
     
