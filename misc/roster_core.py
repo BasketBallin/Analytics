@@ -55,7 +55,10 @@ class Roster():
                 if i[0] in exceptions:
                     self.team_dict['{}'.format(i[0])] = str(i[1]) + " " + str(i[2])
                 else:
-                    self.team_dict['{} {}'.format(i[0],i[1])] = i[2]
+                    if i[2] == 'clippers':
+                        self.team_dict['{} {} 2'.format(i[0],i[1])] = i[2]
+                    else:
+                        self.team_dict['{} {}'.format(i[0],i[1])] = i[2]
         self.team_rosterurl_dict = {}
         for i in self.team_dict.keys():
             for j in teams_raw:
@@ -187,6 +190,7 @@ class Roster():
             self._build_team_database(path=self.path)
             team = [i for i in self.team_dict.keys() if self.team_dict[i] == self.team.lower()][0]
             return self.team_roster_dict[team]
+
 
 if __name__ == '__main__':
     celtics = Roster(team='Celtics')
