@@ -21,7 +21,7 @@ class Scrape(object):
 
     def _ID_exists_in_DB(self, ID):
 	"""
-	Private Function to check if an ID exists in the database for a specific game
+	Private Function to check if an ID exists in the database for a specific game.
 
 	Right now, we dont have a database, so we are just going to check against the downloaded JSON files, assuming they are stored in ../../data/
 	"""
