@@ -65,6 +65,22 @@ class Scrape(object):
     def _get_boxscore(self,game_url,field_type='basic'):
         """
         Private function which retrieves all data for a given game_url.
+
+        Parameters
+        ----------
+        game_url : str
+            The basketball-reference.com game url.
+        field_type : str
+            'basic' or 'advanced', pertaining to the type of data obtained
+
+        Returns
+        -------
+        boxscore_data : dict
+            Boxscore dictionary of basic or advanced data fields for all players
+            for specified game.
+        gametag : str
+            Unique game id number.
+
         """
         
         # Make sure that a game has been specified
@@ -102,28 +118,44 @@ class Scrape(object):
                     if len(pdata) > 2: 
                         tmp = self.boxscore_data.get(name, {})
                         for i,k in enumerate(fields):
-                            if pdata[i+1] == None:
-                                pdata[i+1] = 'None'
+                            if pdata[i] == None:
+                                pdata[i] = 'None'
                             tmp[k] = pdata[i+1].string
                         self.boxscore_data[name] = tmp
 
-        return self.boxscore_data
+        return self.boxscore_data, gametag
 
     def display_boxscore(self,boxscore_data):
-        data = []
+        """
+        A public function which prints the data table for a given boxscore dictionary.
 
+        Parameters
+        ----------
+        boxscore_data : dict
+            A dictionary of data for every player. Basic/Advanced type is learned
+        from the input.
+
+        Returns
+        -------
+        """
+        
+        data = []
+        type = None
+        
         # headers
         if len(boxscore_data[boxscore_data.keys()[0]]) == 20:
-            data.append(self.data_fields['basic'])
+            data.append(["Name"] + self.data_fields['basic'])
+            type='basic'
         elif len(boxscore_data[boxscore_data.keys()[0]]) == 13:
-            data.append(self.data_fields['advanced'])
+            data.append(["Name"] + self.data_fields['advanced'])
+            type='advanced'
         else:
             "ERROR MESSAGE HERE"
 
         # data
         for player in self.boxscore_data:
             row = [player]
-            for k in self.boxscore_data[player]:
+            for k in self.data_fields['{}'.format(type)]:
                 row.append(self.boxscore_data[player][k])
             data.append(row)
         print tabulate(data)
@@ -131,9 +163,8 @@ class Scrape(object):
         
         
 if __name__ == "__main__":
+    # Test #1
     s2014 = Scrape(year=2014)
     links2014 = s2014._get_game_urls_for_season()
-    boxscore_data = s2014._get_boxscore(links2014[0])
+    boxscore_data,gametag = s2014._get_boxscore(links2014[0],field_type='advanced')
     s2014.display_boxscore(boxscore_data)
-    ipdb.set_trace()
-                            
