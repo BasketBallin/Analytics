@@ -1,11 +1,33 @@
 from bs4 import BeautifulSoup
 import urllib2
+import os.path #Can be removed once we set up the db
 
 class Scrape(object):
 
     def __init__(self,year=None):
         self.year = year
         self.base_url = 'http://www.basketball-reference.com'
+
+    def _check_game_exists(self, boxscore_link):
+        """
+        Private function that checks a link against the data we have already downloaded
+        """
+	#Last part of the link holds the ID.
+	game = boxscore_link.split('/')[-1]
+	ID = game[:-5]
+
+	#Querry the database to see if this ID already exists
+	return self._ID_exists_in_DB(ID)
+
+    def _ID_exists_in_DB(self, ID):
+	"""
+	Private Function to check if an ID exists in the database for a specific game.
+
+	Right now, we dont have a database, so we are just going to check against the downloaded JSON files, assuming they are stored in ../../data/
+	"""
+	PATH='../../data/'
+
+	return os.path.exists(PATH+ID+'.json')
     
     def _get_game_urls_for_season(self):
         """
