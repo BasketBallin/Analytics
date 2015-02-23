@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 from tabulate import tabulate
-from urllib2 import urlopen
+from urllib.request import urlopen
 
 import os.path #Can be removed once we set up the db
 import re
@@ -11,28 +11,28 @@ class Scrape(object):
     def __init__(self,year=None):
         self.year = year
         self.base_url = 'http://www.basketball-reference.com'
-
+        
     def _check_game_exists(self, boxscore_link):
         """
         Private function that checks a link against the data we have already downloaded
         """
-	#Last part of the link holds the ID.
-	game = boxscore_link.split('/')[-1]
-	ID = game[:-5]
-
-	#Querry the database to see if this ID already exists
-	return self._ID_exists_in_DB(ID)
+        #Last part of the link holds the ID.
+        game = boxscore_link.split('/')[-1]
+        ID = game[:-5]
+        
+        #Querry the database to see if this ID already exists
+        return self._ID_exists_in_DB(ID)
 
     def _ID_exists_in_DB(self, ID):
-	"""
-	Private Function to check if an ID exists in the database for a specific game.
-
-	Right now, we dont have a database, so we are just going to check against the 
+        """
+        Private Function to check if an ID exists in the database for a specific game.
+        
+        Right now, we dont have a database, so we are just going to check against the 
         downloaded JSON files, assuming they are stored in ../../data/ .
-	"""
-	PATH='../../data/'
+        """
+        PATH='../../data/'
 
-	return os.path.exists(PATH+ID+'.json')
+        return os.path.exists(PATH+ID+'.json')
     
     def _get_game_urls_for_season(self):
         """
@@ -47,14 +47,14 @@ class Scrape(object):
         self.game_url = self.base_url+"/leagues/NBA_"+str(self.year)+"_games.html"
 
         # Begin parsing
-        html = urlopen(self.game_url).read()
+        html = urlopen(self.game_url).read()        
         soup = BeautifulSoup(html, 'html.parser')
         table = soup.find('table', 'sortable stats_table')
         
         #Get each row of the table
         table = table.find('tbody')
         rows = [row for row in table.findAll('tr')]
-	
+
         #Get the box score link for each row
         boxscore_links = [self.base_url+row.findAll('td')[1].a['href']
                           for row in rows
@@ -99,8 +99,8 @@ class Scrape(object):
         # Obtain the html
         html = urlopen(self.game_url).read()
         gametag = self.game_url.split('/')[-1].strip('.html')
-        soup = BeautifulSoup(html, 'lxml')
-
+        soup = BeautifulSoup(html,'html.parser')
+        
         fields = self.data_fields['{}'.format(field_type)]
         
         # Get table from html
@@ -143,10 +143,10 @@ class Scrape(object):
         type = None
         
         # headers
-        if len(boxscore_data[boxscore_data.keys()[0]]) == 20:
+        if len(boxscore_data[[i for i in boxscore_data.keys()][0]]) == 20:
             data.append(["Name"] + self.data_fields['basic'])
             type='basic'
-        elif len(boxscore_data[boxscore_data.keys()[0]]) == 13:
+        elif len(boxscore_data[[i for i in boxscore_data.keys()][0]]) == 13:
             data.append(["Name"] + self.data_fields['advanced'])
             type='advanced'
         else:
@@ -158,7 +158,7 @@ class Scrape(object):
             for k in self.data_fields['{}'.format(type)]:
                 row.append(self.boxscore_data[player][k])
             data.append(row)
-        print tabulate(data)
+        print(tabulate(data))
 
         
         
@@ -166,5 +166,6 @@ if __name__ == "__main__":
     # Test #1
     s2014 = Scrape(year=2014)
     links2014 = s2014._get_game_urls_for_season()
-    boxscore_data,gametag = s2014._get_boxscore(links2014[0],field_type='advanced')
+    boxscore_data,gametag = s2014._get_boxscore(links2014[0],field_type='basic')
     s2014.display_boxscore(boxscore_data)
+    
