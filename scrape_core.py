@@ -4,6 +4,7 @@ from urllib.request import urlopen
 
 import os.path #Can be removed once we set up the db
 import re
+import json
 import ipdb
 
 class Scrape(object):
@@ -160,12 +161,43 @@ class Scrape(object):
             data.append(row)
         print(tabulate(data))
 
-        
+    def _dump_gamedata_to_json(self,boxscore_data,gametag):
+        """
+        A private function which writes all game data to a json file, where 
+        the filename is the gametag. 
+        ** Currently dumps json files in directory called 'data' on Desktop 
+        ** (../../), two directories up from git directory.
+
+        Parameters
+        ----------
+        boxscore_data : dict
+            A dictionary of data for every player. Basic/Advanced type is learned
+            from the input.
+        gametag : str
+            Unique game id number.
+        """
+
+        # Figures out if type is 'basic' or 'advanced'
+        type = None
+        if len(boxscore_data[[i for i in boxscore_data.keys()][0]]) == 20:
+            type='basic'
+        elif len(boxscore_data[[i for i in boxscore_data.keys()][0]]) == 13:
+            type='advanced'
+        else:
+            "ERROR MESSAGE HERE"
+
+        with open ('../../data/'+gametag+'.json','w') as f:
+            json.dump(boxscore_data, f)
         
 if __name__ == "__main__":
-    # Test #1
+    
+    # Test #1: Scrape 2014, and choose the first game.
+    # Get boxscore, and print table to terminal. Then
+    # dump game data to json file (currently on Desktop).
     s2014 = Scrape(year=2014)
     links2014 = s2014._get_game_urls_for_season()
     boxscore_data,gametag = s2014._get_boxscore(links2014[0],field_type='basic')
     s2014.display_boxscore(boxscore_data)
+    s2014._dump_gamedata_to_json(boxscore_data,gametag)
+    
     
