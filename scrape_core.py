@@ -2,9 +2,11 @@ from bs4 import BeautifulSoup
 from tabulate import tabulate
 from urllib.request import urlopen
 
+# temporary or testing imports
 import os.path #Can be removed once we set up the db
 import re
 import json
+from pymongo import MongoClient
 import ipdb
 
 class Scrape(object):
@@ -13,6 +15,10 @@ class Scrape(object):
         self.year = year
         self.base_url = 'http://www.basketball-reference.com'
         self.debug=debug
+        try:
+            self.client = MongoClient()
+        except:
+            print("MongoDB: Connection refused")
         
     def _check_game_exists(self, boxscore_link):
         """
@@ -212,6 +218,12 @@ class Scrape(object):
         else:
             if self.debug is True:
                 print("Game {} already exists in db. Skipping storage phase...".format(gametag))
+
+    def _write_to_mongodb(self):
+        self.db = self.client.game_data
+        self.posts = self.db.posts
+        
+        ipdb.set_trace()
         
 if __name__ == "__main__":
     
@@ -230,11 +242,12 @@ if __name__ == "__main__":
     # for 2013 season. Check to see if any have been
     # dumped to json files previously. Eventually, check
     # against database rather than json file.
-    s2013 = Scrape(year=2013,debug=True)
+    #s2013 = Scrape(year=2013,debug=True)
+    '''
     links2013 = s2013._get_game_urls_for_season()
     for li in links2013:
         boxscore_data,gametag = s2013._get_boxscore(li,field_type='advanced')
         s2013._dump_gamedata_to_json(boxscore_data,gametag)
         boxscore_data,gametag = s2013._get_boxscore(li,field_type='basic')
         s2013._dump_gamedata_to_json(boxscore_data,gametag)
-    
+    '''
