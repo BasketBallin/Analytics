@@ -34,17 +34,11 @@ class Scrape(object):
     def _ID_exists_in_DB(self, ID):
         """
         Private Function to check if an ID exists in the database for a specific game.
-        
-        Right now, we dont have a database, so we are just going to check against the 
-        downloaded JSON files, assuming they are stored in ../../data/ .
         """
-        PATH='../../data/'
-        files = os.listdir(PATH)
-        exists = False
-        for f in files:
-            if ID in f:
-                exists = True
-        return exists
+        self.db = self.client.game_data
+        self.posts = self.db.posts
+        document = self.posts.find_one({'GAMETAG': ID})
+        return document is not None
     
     def _get_game_urls_for_season(self):
         """
@@ -96,12 +90,11 @@ class Scrape(object):
         """
         
         # Make sure that a game has been specified
-        self.game_url = game_url
-        self.boxscore_data = {}
-        assert self.game_url is not None, "Must specify a game."
+        boxscore_data = {}
+        assert game_url is not None, "Must specify a game."
 
         # Setting up dictionary storage structure
-        self.data_fields = {'basic':['MP','FG','FGA','FG%','3P','3PA','3P%',
+        data_fields = {'basic':['MP','FG','FGA','FG%','3P','3PA','3P%',
                                 'FT','FTA','FT%','ORB','DRB','TRB','AST',
                                 'STL','BLK','TOV','PF','PTS','+/-'],
                        'advanced':['MP','TS%','eFG%','ORB%','DRB%','TRB%',
@@ -109,38 +102,41 @@ class Scrape(object):
                                    'DRtg']}
 
         # Check for game data existence in db
-        gametag = self.game_url.split('/')[-1].strip('.html')
-        exists = self._ID_exists_in_DB(gametag+field_type)
+        gametag = game_url.split('/')[-1].strip('.html')
+        exists = self._ID_exists_in_DB(gametag)
         # Obtain the html if game doesn't exist
         if exists is False:
-            html = urlopen(self.game_url).read()
+            html = urlopen(game_url).read()
             soup = BeautifulSoup(html,'html.parser')
-            fields = self.data_fields['{}'.format(field_type)]
+            for field_type in data_fields:
+	            fields = data_fields['{}'.format(field_type)]
         
-            # Get table from html
-            tables = soup.findAll('table', id=re.compile(field_type))
-            tables = [t.find('tbody') for t in tables]
+        	    # Get table from html
+	            tables = soup.findAll('table', id=re.compile(field_type))
+	            tables = [t.find('tbody') for t in tables]
     
-            for t in tables:
-                data = t.findAll('tr')
-                for player in data:
-                    if player['class'][0] == '':
-                        pdata = player.findAll('td')
-                        name = pdata[0].string
-                        # is this sufficient to always determine if
-                        # the player wasn't on the bench?
-                        if len(pdata) > 2: 
-                            tmp = self.boxscore_data.get(name, {})
-                            for i,k in enumerate(fields):
-                                if pdata[i] == None:
-                                    pdata[i] = 'None'
-                                tmp[k] = pdata[i+1].string
-                            self.boxscore_data[name] = tmp
-
-            return self.boxscore_data, gametag
+	            for t in tables:
+	                data = t.findAll('tr')
+	                for player in data:
+	                    if player['class'][0] == '':
+	                        pdata = player.findAll('td')
+	                        name = pdata[0].string
+	                        # is this sufficient to always determine if
+	                        # the player wasn't on the bench?
+	                        if len(pdata) > 2: 
+	                            tmp = boxscore_data.get(name, {})
+	                            for i,k in enumerate(fields):
+	                                if pdata[i] == None:
+	                                    pdata[i] = 'None'
+	                                tmp[k] = pdata[i+1].string
+	                            boxscore_data[name] = tmp
+            
+            for player in self.player_data:
+                boxscore_data[player]['GAMETAG'] = gametag
+            return boxscore_data, gametag
         else:
             print("Game {} already exists in db. Skipping web-scraping phase...".format(gametag))
-            return self.boxscore_data, gametag
+            return boxscore_data, gametag
 
     def display_boxscore(self,boxscore_data):
         """
