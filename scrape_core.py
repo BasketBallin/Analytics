@@ -131,8 +131,7 @@ class Scrape(object):
 	                                tmp[k] = pdata[i+1].string
 	                            boxscore_data[name] = tmp
             
-            for player in self.player_data:
-                boxscore_data[player]['GAMETAG'] = gametag
+            boxscore_data['GAMETAG'] = gametag
             return boxscore_data, gametag
         else:
             print("Game {} already exists in db. Skipping web-scraping phase...".format(gametag))
@@ -215,11 +214,12 @@ class Scrape(object):
             if self.debug is True:
                 print("Game {} already exists in db. Skipping storage phase...".format(gametag))
 
-    def _write_to_mongodb(self):
-        self.db = self.client.game_data
-        self.posts = self.db.posts
+    def _write_to_mongodb(self, boxscore_data):
+        db = self.client.game_data
+        posts = db.posts
         
-        ipdb.set_trace()
+        post_id = posts.insert(boxscore_data)
+        return post_id
         
 if __name__ == "__main__":
     

@@ -53,6 +53,21 @@ class TestScrape(object):
         #Check if the GAMETAG is gone
         assert s2014._ID_exists_in_DB(1337) == False
 
+    def Add_boxscore_to_mongodb(self):
+        """
+        Download a boxscore. Check that the ID doesnt exist. Add the boxscore to the db.
+        """
+        url = 'http://www.basketball-reference.com/boxscores/201502270ATL.html'
+        ID = '201502270ATL'
+        s2014 = Scrape(year=2014)
+        boxscore_data,gametag = s2014._get_boxscore(url,field_type='basic')
+        assert s2014._ID_exists_in_DB(ID) == False, "ID already exists"
+        post_id = s2014._write_to_mongodb(boxscore_data)
+
+        assert s2014.client.game_data.posts.find_one({'GAMETAG':ID}) is not None, "Data never written to db"
+        s2014.client.game_data.posts.remove({'_id':post_id})
+
+
 
     # Test #2: Store game data for all basketball games
     # for 2013 season. Check to see if any have been
