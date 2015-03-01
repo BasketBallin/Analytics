@@ -35,3 +35,39 @@ class TestScrape(object):
         f = open('./tests/data/season2013gamedata.json','r')
         gamedatafromfile = json.load(f)
         assert boxscore_data == gamedatafromfile, "Game data has not been properly downloaded..."
+        
+    def check_game_ID_exists(self):
+        #Add a fake entry to the database, and check if it exists. Then delete the entry
+        s2014 = Scrape(year=2014)
+        db = s2014.client.game_data
+        posts = db.posts
+
+        #Add fake entry
+        post = {'GAMETAG':1337, 'MP':1,'FG':1,'FGA':1,'FG%':1,'3P':1,'3PA':1,'3P%':1,
+                'FT':1,'FTA':1,'FT%':1,'ORB':1,'DRB':1,'TRB':1,'AST':1,
+                'STL':1,'BLK':1,'TOV':1,'PF':1,'PTS':1,'+/-':1}
+
+        post_id = posts.insert(post)
+
+        #Check if the GAMETAG exists
+        assert s2014._ID_exists_in_DB(1337) == True
+
+        #Remove the entry
+        posts.remove({'_id':post_id})
+        
+        #Check if the GAMETAG is gone
+        assert s2014._ID_exists_in_DB(1337) == False
+
+    def Add_boxscore_to_mongodb(self):
+        """
+        Download a boxscore. Check that the ID doesnt exist. Add the boxscore to the db.
+        """
+        url = 'http://www.basketball-reference.com/boxscores/201502270ATL.html'
+        ID = '201502270ATL'
+        s2014 = Scrape(year=2014)
+        boxscore_data,gametag = s2014._get_boxscore(url,field_type='basic')
+        assert s2014._ID_exists_in_DB(ID) == False, "ID already exists"
+        post_id = s2014._write_to_mongodb(boxscore_data)
+
+        assert s2014.client.game_data.posts.find_one({'GAMETAG':ID}) is not None, "Data never written to db"
+        s2014.client.game_data.posts.remove({'_id':post_id})
