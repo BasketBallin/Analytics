@@ -195,3 +195,4 @@ class Roster():
 if __name__ == '__main__':
     celtics = Roster(team='Celtics')
     celtics_roster = celtics.get_roster()
+    ipdb.set_trace()
