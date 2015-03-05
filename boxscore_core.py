@@ -141,12 +141,13 @@ class BoxScore(object):
                         meta_data['time_of_game'] = row.text.split('Game:')[1]
                 except:
                     continue
-            
-            return boxscore_data, meta_data, gametag
+           
+            boxscore_data['meta'] = meta_data
+            return boxscore_data
         else:
             print("Game {} already exists in db. Skipping web-scraping phase...".format(gametag))
             # currently returns empty dicts, but should ideally load from mongodb and return to user
-            return boxscore_data, meta_data, gametag
+            return None
 
     def _get_meta(self,game_url):
         """

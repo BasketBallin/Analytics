@@ -29,7 +29,7 @@ class TestBoxScore(object):
         # Get boxscore; basic then advanced
         s2013 = BoxScore(year=2013)
         links2013 = s2013._get_game_urls_for_season()
-        boxscore_data,gametag = s2013._get_boxscore(links2013[0])
+        boxscore_data = s2013._get_boxscore(links2013[0])
 
         # load data from static json file
         f = open('./tests/data/season2013gamedata.json','r')
@@ -66,14 +66,14 @@ class TestBoxScore(object):
         url = 'http://www.basketball-reference.com/boxscores/201502270ATL.html'
         ID = '201502270ATL'
         s2014 = BoxScore(year=2014)
-        boxscore_data,gametag = s2014._get_boxscore(url,field_type='basic')
+        boxscore_data = s2014._get_boxscore(url)
         scrape = Scrape()
         assert scrape._ID_exists_in_DB(ID) == False, "ID already exists"
         post_id = scrape._write_to_mongodb(boxscore_data)
-
+        ipdb.set_trace()
         assert scrape.client.game_data.posts.find_one({'GAMETAG':ID}) is not None, "Data never written to db"
         scrape.client.game_data.posts.remove({'_id':post_id})
 
-class TestRoster(object):
-
-    def 
+#class TestRoster(object):
+#
+#    def 
