@@ -64,6 +64,7 @@ class BoxScore(object):
         
         # Make sure that a game has been specified
         boxscore_data = {}
+        meta_data = {}
         assert game_url is not None, "Must specify a game."
 
         # Setting up dictionary storage structure
@@ -83,31 +84,69 @@ class BoxScore(object):
             html = urlopen(game_url).read()
             soup = BeautifulSoup(html,'html.parser')
             for field_type in data_fields:
-	            fields = data_fields['{}'.format(field_type)]
-        
-        	    # Get table from html
-	            tables = soup.findAll('table', id=re.compile(field_type))
-	            tables = [t.find('tbody') for t in tables]
+                fields = data_fields['{}'.format(field_type)]
+                
+                # Get table from html
+                tables = soup.findAll('table', id=re.compile(field_type))
+                tables = [t.find('tbody') for t in tables]
     
-	            for t in tables:
-	                data = t.findAll('tr')
-	                for player in data:
-	                    if player['class'][0] == '':
-	                        pdata = player.findAll('td')
-	                        name = pdata[0].string
-	                        if len(pdata) > 2: 
-	                            tmp = boxscore_data.get(name, {})
-	                            for i,k in enumerate(fields):
-	                                if pdata[i] == None:
-	                                    pdata[i] = 'None'
-	                                tmp[k] = pdata[i+1].string
-	                            boxscore_data[name] = tmp
+                for t in tables:
+                    data = t.findAll('tr')
+                    for player in data:
+                        if player['class'][0] == '':
+                            pdata = player.findAll('td')
+                            name = pdata[0].string
+                            if len(pdata) > 2: 
+                                tmp = boxscore_data.get(name, {})
+                                for i,k in enumerate(fields):
+                                    if pdata[i] == None:
+                                        pdata[i] = 'None'
+                                    tmp[k] = pdata[i+1].string
+                                boxscore_data[name] = tmp
             
             boxscore_data['GAMETAG'] = gametag
-            return boxscore_data, gametag
+
+            # meta data
+            title_raw = soup.find('title').text
+            meta_data['home_team'] = title_raw.split(' Box Score, ')[0].split(' at ')[1]
+            meta_data['away_team'] = title_raw.split(' Box Score, ')[0].split(' at ')[0]
+            meta_data['date_played'] = title_raw.split(' Box Score, ')[1].split(' |')[0]
+            for row in soup.find('table',{"class" : "margin_top small_text"}):
+                try:
+                    if row.contents[0].text == 'Inactive:':
+                        inactive_dict = {}
+                        away = True
+                        for i in row.contents[1].text.split('\xa0'):
+                            if ':' in i:
+                                if '\n' in i:
+                                    away_text = i.strip('\n').strip(':')
+                                    inactive_dict[away_text] = []
+                                else:
+                                    home_text = i.strip(':')
+                                    inactive_dict[home_text] = []
+                                    away = False
+                            else:
+                                if away is True and i not in ['']:
+                                    inactive_dict[away_text].append(i.strip(','))
+                                elif away is False and i not in ['']:
+                                    inactive_dict[home_text].append(i.strip(','))
+                        meta_data['inactive'] = inactive_dict
+                    elif row.contents[0].text == 'Officials:':
+                        meta_data['officials'] = []
+                        for official in row.findAll('a'):
+                            meta_data['officials'].append(official.text)
+                    elif row.contents[0].text == 'Attendance:':
+                        meta_data['attendance'] = "".join(row.text.split(':')[1].split(','))
+                    elif row.contents[0].text == 'Time of Game:':
+                        meta_data['time_of_game'] = row.text.split('Game:')[1]
+                except:
+                    continue
+            
+            return boxscore_data, meta_data, gametag
         else:
             print("Game {} already exists in db. Skipping web-scraping phase...".format(gametag))
-            return boxscore_data, gametag
+            # currently returns empty dicts, but should ideally load from mongodb and return to user
+            return boxscore_data, meta_data, gametag
 
     def _get_meta(self,game_url):
         """
