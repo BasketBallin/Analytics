@@ -141,8 +141,39 @@ class BoxScore(object):
                         meta_data['time_of_game'] = row.text.split('Game:')[1]
                 except:
                     continue
-           
             boxscore_data['meta'] = meta_data
+            
+            # scoring
+            scoring = {}
+            for row in soup.find('table',{"class" : "nav_table stats_table"}):
+                try:
+                    if len(row.contents) == 13:
+                        try:
+                            int(row.contents[11].text)
+                            scoring['{}'.format(row.contents[1].text)] = [row.contents[3].text,
+                                                                          row.contents[5].text,
+                                                                          row.contents[7].text,
+                                                                          row.contents[9].text,
+                                                                          row.contents[11].text]
+                        except:
+                            continue
+                except:
+                    continue
+            boxscore_data['scoring'] = scoring
+
+            # four-factors
+            four_factors = {}
+            for row in soup.findAll('table',{"id":"four_factors"}):
+                try:
+                    tmp_ff = row.contents[5].text.split('\n')
+                    four_factors['{}'.format(tmp_ff[2])] = [tmp_ff[3],tmp_ff[4],tmp_ff[5],
+                                                       tmp_ff[6],tmp_ff[7],tmp_ff[8]]
+                    four_factors['{}'.format(tmp_ff[11])] = [tmp_ff[12],tmp_ff[13],tmp_ff[14],
+                                                        tmp_ff[15],tmp_ff[16],tmp_ff[17]]
+                except:
+                    continue
+            boxscore_data['four_factors'] = four_factors
+            
             return boxscore_data
         else:
             print("Game {} already exists in db. Skipping web-scraping phase...".format(gametag))
