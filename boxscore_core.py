@@ -79,19 +79,19 @@ class BoxScore(object):
         gametag = game_url.split('/')[-1].strip('.html')
         scrape = Scrape()
         exists = scrape._ID_exists_in_DB(gametag)
-        # Obtain the html if game doesn't exist
+        
+        # Scrape boxscore from the html if game doesn't exist
         if exists is False:
             html = urlopen(game_url).read()
             soup = BeautifulSoup(html,'html.parser')
             for field_type in data_fields:
                 fields = data_fields['{}'.format(field_type)]
-                
                 # Get table from html
                 tables = soup.findAll('table', id=re.compile(field_type))
-                tables = [t.find('tbody') for t in tables]
-    
-                for t in tables:
-                    data = t.findAll('tr')
+                tbodies = [t.find('tbody') for t in tables]
+                for i,tab in enumerate(tbodies):
+                    tmp_team = tables[i]['id'].split('_')[0]
+                    data = tab.findAll('tr')
                     for player in data:
                         if player['class'][0] == '':
                             pdata = player.findAll('td')
@@ -103,7 +103,13 @@ class BoxScore(object):
                                         pdata[i] = 'None'
                                     tmp[k] = pdata[i+1].string
                                 boxscore_data[name] = tmp
-            
+                            try:
+                                boxscore_data[name]['team']
+                            except:
+                                try:
+                                    boxscore_data[name]['team'] = tmp_team
+                                except:
+                                    continue                                
             boxscore_data['GAMETAG'] = gametag
 
             # meta data
