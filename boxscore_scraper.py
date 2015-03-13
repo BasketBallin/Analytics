@@ -10,7 +10,7 @@ import re
 import json
 import ipdb
 
-class BoxScore_Scraper(object):
+class BoxScoreScraper(object):
 
     def __init__(self, mongo_client=None):
         self.client = mongo_client
@@ -289,7 +289,7 @@ class BoxScore_Scraper(object):
             if self.debug is True:
                 print("Game {} already exists in db. Skipping storage phase...".format(gametag))
 
-    def Scrape(self, year):
+    def scrape(self, year):
         #Clear all current boxscore data
         self.boxscore_list = []
 
