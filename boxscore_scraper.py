@@ -292,11 +292,13 @@ class BoxScoreScraper(object):
 
         #Get game urls
         links = self._get_game_urls_for_season(year)
-       
+      
         #Get a boxscore for each game
         for link in links:
             #Check that game isnt already in database
             if self._check_game_exists(link):
+                if self.debug:
+                    print("Game Already Exists: {}".format(link))
                 continue #ID already exists
             bscore = self._get_boxscore(link)
 
