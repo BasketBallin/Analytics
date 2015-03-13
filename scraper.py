@@ -15,10 +15,11 @@ class Scraper(object):
             self.client = MongoClient()
         except:
             print("MongoDB: Connection refused")
-        self.box_scraper = BoxScore_Scraper(self.client)
-        #self.roster_scraper = Roster_Scraper(self.client)
+        self.box_scraper = BoxScoreScraper(self.client)
+        self.box_scraper.debug = True
+        #self.roster_scraper = RosterScraper(self.client)
         
     
-    def Scrape(self, year=2015):
-        self.box_scraper.Scrape(year=year)
+    def scrape(self, year=2015):
+        self.box_scraper.scrape(year=year)
         #self.roster_scraper.Scrape()

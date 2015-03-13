@@ -7,7 +7,6 @@ import re
 import json
 import ipdb
 
-from roster import *
 
 class Roster_Scraper(object):
 
@@ -99,9 +98,5 @@ class Roster_Scraper(object):
             #tmp['FULL'] = team['FULL']
             #tmp['SHORT'] = team['SHORT']
             #team_data[ team['SHORT'] ] = tmp
-            T = Roster()
-            T.set_data([team, tmp])
-            team_data.append(T)
-        ipdb.set_trace()
 
 
