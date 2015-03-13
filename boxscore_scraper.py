@@ -189,28 +189,6 @@ class BoxScoreScraper(object):
             print("Game {} already exists in db. Skipping web-scraping phase...".format(gametag))
             # currently returns empty dicts, but should ideally load from mongodb and return to user
             return None
-
-    def _get_meta(self,game_url):
-        """
-        Private ... finish docstring.
-        """
-
-        # Make sure that a game has been specified
-        meta_data = {}
-        assert game_url is not None, "Must specify a game."
-
-        # Setting up dictionary storage structure
-        meta_fields = {}
-
-        # Check for game data existence in db
-        gametag = game_url.split('/')[-1].strip('.html')
-        exists = self._ID_exists_in_DB(gametag)
-        
-        # Obtain the html if game doesn't exist
-        if exists is False:
-            html = urlopen(game_url).read()
-            soup = BeautifulSoup(html,'html.parser')
-            ipdb.set_trace()
             
     def display_boxscore(self,boxscore_data):
         """
