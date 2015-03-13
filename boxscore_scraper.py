@@ -14,7 +14,6 @@ class BoxScoreScraper(object):
     def __init__(self, mongo_client=None):
         self.client = mongo_client
         self.base_url = 'http://www.basketball-reference.com'
-        self.boxscore_list = []
 
     def _get_game_urls_for_season(self, year=None):
         """
@@ -267,7 +266,17 @@ class BoxScoreScraper(object):
                 print("Game {} already exists in db. Skipping storage phase...".format(gametag))
 
     def scrape(self, year):
+        """
+        Public function to scrape all boxscore data for any given season from basketball-reference.com.
 
+        Parameters
+        ----------
+        year : int
+            The season boxscores should be scraped for. Default value is 2015
+
+        Returns
+        -------
+        """
         #Get game urls
         links = self._get_game_urls_for_season(year)
       
@@ -296,7 +305,7 @@ class BoxScoreScraper(object):
 
     def _ID_exists_in_DB(self, ID):
         """
-        Private Function to check if an ID exists in the database for a specific game.
+        Private function to check if an ID exists in the database for a specific game.
         """
         assert self.client is not None, "No MongoDB Client"
         self.db = self.client.game_data
@@ -306,9 +315,24 @@ class BoxScoreScraper(object):
     
 
     def _write_to_mongodb(self, boxscore_data):
+        """
+        Private function which writes boxscore_data dictionary to the mongodb collection entitled, 'game_data'.
+
+        Parameters
+        ----------
+        boxscore_data : dict
+            The boxscore data dictionary to be written to the database.
+
+        Returns
+        -------
+
+        """
+        
         assert self.client is not None, "No MongoDB Client"
         db = self.client.game_data
         posts = db.posts
         
         post_id = posts.insert(boxscore_data)
+        if self.debug is True:
+            print("Added {} to database...".format(post_id))
         return post_id
