@@ -1,5 +1,3 @@
-from scrape_core import Scrape
-
 from bs4 import BeautifulSoup
 from tabulate import tabulate
 from urllib.request import urlopen
@@ -9,19 +7,21 @@ import re
 import json
 import ipdb
 
+from roster import *
 
-class Roster(object):
+class Roster_Scraper(object):
 
     def __init__(self):
         pass
 
-    def  _get_team_links(self):
+    def _get_team_links(self):
         """
         We could either hardcode these links or scrape them.
         Might make sense to scrape them just to make sure
         incase anything changes.
         """
         url = 'http://espn.go.com/nba/players'
+        link_base = 'http://espn.go.com/nba/team/roster/_/name/'
         # Begin parsing
         html = urlopen(url).read()        
         soup = BeautifulSoup(html, 'html.parser')
@@ -34,7 +34,9 @@ class Roster(object):
         #For each small logos, for each list element, get the link to the team
         for group in small_logos:
             for team in group.findAll('li'):
-                teams_links.append(team.a['href'])
+                tmp = team.a['href']
+                tmp = tmp.split('/')
+                teams_links.append(link_base+tmp[-2]+"/"+tmp[-1])
 
         return teams_links
    
@@ -82,7 +84,24 @@ class Roster(object):
         return player_dict
            
 
-    def get_rosters(self):
+    def Scrape(self):
         """
         Get links for every team. Get Team names. For each team, build the roster.
         """
+        team_data = []
+        links = self._get_team_links()
+        ipdb.set_trace()
+        teams = self._parse_links(links)
+        ipdb.set_trace()
+        for team in teams:
+            print(team)
+            tmp = self._parse_team(team['LINK'])
+            #tmp['FULL'] = team['FULL']
+            #tmp['SHORT'] = team['SHORT']
+            #team_data[ team['SHORT'] ] = tmp
+            T = Roster()
+            T.set_data([team, tmp])
+            team_data.append(T)
+        ipdb.set_trace()
+
+

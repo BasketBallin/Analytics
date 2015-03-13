@@ -1,8 +1,8 @@
 class Roster():
     def __init__(self):
-	self.Team = None
+        self.Team = None
         self.Team_Short = None
-	self.Players = None
+        self.Players = None
         self.tmpdata = None
 
     def set_team(self, T, S):
