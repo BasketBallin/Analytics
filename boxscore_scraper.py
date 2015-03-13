@@ -3,7 +3,6 @@ from pymongo import MongoClient
 from bs4 import BeautifulSoup
 from tabulate import tabulate
 from urllib.request import urlopen
-from boxscore import *
 import re
 
 # temporary imports
@@ -290,27 +289,19 @@ class BoxScoreScraper(object):
                 print("Game {} already exists in db. Skipping storage phase...".format(gametag))
 
     def scrape(self, year):
-        #Clear all current boxscore data
-        self.boxscore_list = []
 
         #Get game urls
         links = self._get_game_urls_for_season(year)
        
-        ipdb.set_trace() 
         #Get a boxscore for each game
         for link in links:
             #Check that game isnt already in database
             if self._check_game_exists(link):
                 continue #ID already exists
-            bscore = BoxScore()
-            bscore.set_data( self._get_boxscore(link) )
-            #bscore.set_meta( self._get_meta(link) )
-            self.boxscore_list.append(bscore)
+            bscore = self._get_boxscore(link)
 
-        ipdb.set_trace() 
-        #Add each boxscore to the DB
-        for bs in self.boxscore_list:
-            self._write_to_mongodb(bs.get_data())
+            #Add each boxscore to the DB
+            self._write_to_mongodb(bscore)
     
     def _check_game_exists(self, boxscore_link):
         """
