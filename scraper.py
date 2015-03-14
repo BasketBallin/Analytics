@@ -15,12 +15,19 @@ class Scraper(object):
         self.debug=debug
         # get current year
         self.current_year = time.localtime().tm_year
+        
+        # checking is mongodb client is running
         try:
             self.client = MongoClient()
         except:
             print("MongoDB: Connection refused")
+
         self.box_scraper = BoxScoreScraper(self.client)
-        self.box_scraper.debug = True
+
+        # turning debugging on
+        if debug is true:
+            self.box_scraper.debug = True
+            
         #self.roster_scraper = RosterScraper(self.client)
         
     
