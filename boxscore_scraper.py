@@ -149,8 +149,8 @@ class BoxScoreScraper(object):
                 except:
                     continue
            
-            boxscore_data['meta'] = meta_data
-            
+            boxscore_data.update(meta_data)
+
             # scoring
             scoring = {}
             for row in soup.find('table',{"class" : "nav_table stats_table"}):
