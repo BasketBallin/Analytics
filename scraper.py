@@ -25,12 +25,14 @@ class Scraper(object):
         self.box_scraper = BoxScoreScraper(self.client)
 
         # turning debugging on
-        if debug is true:
+        if debug is True:
             self.box_scraper.debug = True
             
         #self.roster_scraper = RosterScraper(self.client)
         
     
-    def scrape(self, year=self.current_year):
+    def scrape(self, year=None):
+        if year is None:
+            year = self.current_year
         self.box_scraper.scrape(year=year)
         #self.roster_scraper.Scrape()
