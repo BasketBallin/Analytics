@@ -11,9 +11,10 @@ import ipdb
 
 class BoxScoreScraper(object):
 
-    def __init__(self, mongo_client=None):
+    def __init__(self, mongo_client=None, debug=False):
         self.client = mongo_client
         self.base_url = 'http://www.basketball-reference.com'
+        self.debug = debug
 
     def _get_game_urls_for_season(self, year=None):
         """
@@ -325,7 +326,6 @@ class BoxScoreScraper(object):
 
         Returns
         -------
-
         """
         
         assert self.client is not None, "No MongoDB Client"
@@ -336,3 +336,26 @@ class BoxScoreScraper(object):
         if self.debug is True:
             print("Added {} to database...".format(post_id))
         return post_id
+
+    def _purge_mongodb_collection(self,collection=None):
+        """
+        Private function which purges a mongodb collection.
+
+        Parameters
+        ----------
+        collection : str
+            The name of the mongodb collection to delete.
+
+        Returns
+        -------
+        """
+
+        assert self.client is not None, "No MongoDB Client"
+        db = self.client.game_data
+        posts = db.posts
+
+        assert collection is not None, "Must specify a collection name to purge from the database"
+        assert collection in posts.database.name, "Collection is not in the database"
+        ipdb.set_trace()
+        posts.remove()
+        ipdb.set_trace()
