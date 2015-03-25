@@ -32,7 +32,38 @@ class Scraper(object):
         
     
     def scrape(self, year=None):
+        """
+        Public function for scraping boxscore data (and soon roster data), by year,
+        and writes it to the 'boxscore_data' collection.
+
+        Parameters
+        ----------
+        year : int
+            The season to scrape.
+
+        Returns
+        -------
+        """
         if year is None:
             year = self.current_year
+
         self.box_scraper.scrape(year=year)
         #self.roster_scraper.Scrape()
+
+
+    def purge(self, collection=None):
+        """
+        Public function for purging a collection from the database.
+
+        Parameters
+        ----------
+        collection : str
+            The the name of the collection to be deleted.
+
+        Returns
+        -------
+        """
+
+        self.box_scraper._purge_mongodb_collection(collection=collection)
+    
+        
