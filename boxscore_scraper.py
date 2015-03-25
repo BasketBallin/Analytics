@@ -116,6 +116,7 @@ class BoxScoreScraper(object):
 
             # meta data
             title_raw = soup.find('title').text
+            meta_data['GAMETAG'] = gametag
             meta_data['home_team'] = title_raw.split(' Box Score, ')[0].split(' at ')[1]
             meta_data['away_team'] = title_raw.split(' Box Score, ')[0].split(' at ')[0]
             meta_data['date_played'] = title_raw.split(' Box Score, ')[1].split(' |')[0]
@@ -150,10 +151,10 @@ class BoxScoreScraper(object):
                 except:
                     continue
            
-            boxscore_data.update(meta_data)
 
             # scoring
             scoring = {}
+            scoring['GAMETAG'] = gametag
             for row in soup.find('table',{"class" : "nav_table stats_table"}):
                 try:
                     if len(row.contents) == 13:
@@ -168,10 +169,10 @@ class BoxScoreScraper(object):
                             continue
                 except:
                     continue
-            boxscore_data['scoring'] = scoring
 
             # four-factors
             four_factors = {}
+            four_factors['GAMETAG'] = gametag
             for row in soup.findAll('table',{"id":"four_factors"}):
                 try:
                     tmp_ff = row.contents[5].text.split('\n')
@@ -181,9 +182,8 @@ class BoxScoreScraper(object):
                                                         tmp_ff[15],tmp_ff[16],tmp_ff[17]]
                 except:
                     continue
-            boxscore_data['four_factors'] = four_factors
             
-            return boxscore_data
+            return {'boxscore':boxscore_data, 'meta':meta_data, 'scoring':scoring, 'four_factors':four_factors}
         else:
             print("Game {} already exists in db. Skipping web-scraping phase...".format(gametag))
             # currently returns empty dicts, but should ideally load from mongodb and return to user
@@ -285,13 +285,14 @@ class BoxScoreScraper(object):
         for link in links:
             #Check that game isnt already in database
             if self._check_game_exists(link):
-                if self.debug:
-                    print("Game Already Exists: {}".format(link))
+                #if self.debug:
+                #    print("Game Already Exists: {}".format(link))
                 continue #ID already exists
             bscore = self._get_boxscore(link)
 
             #Add each boxscore to the DB
-            self._write_to_mongodb(bscore)
+            if bscore is not None:
+                self._write_to_mongodb(bscore)
     
     def _check_game_exists(self, boxscore_link):
         """
@@ -310,12 +311,12 @@ class BoxScoreScraper(object):
         """
         assert self.client is not None, "No MongoDB Client"
         self.db = self.client.game_data
-        self.posts = self.db.posts
-        document = self.posts.find_one({'GAMETAG': ID})
+        self.boxscore_col = self.db.boxscore
+        document = self.boxscore_col.find_one({'GAMETAG': ID})
         return document is not None
     
 
-    def _write_to_mongodb(self, boxscore_data):
+    def _write_to_mongodb(self, bscore):
         """
         Private function which writes boxscore_data dictionary to the mongodb collection entitled, 'game_data'.
 
@@ -330,9 +331,15 @@ class BoxScoreScraper(object):
         
         assert self.client is not None, "No MongoDB Client"
         db = self.client.game_data
-        posts = db.posts
+        boxscore = db.boxscore
+        meta = db.meta
+        four_factors = db.four_factors
+        scoring = db.scoring
         
-        post_id = posts.insert(boxscore_data)
+        post_id = boxscore.insert(bscore['boxscore'])
+        post_id = meta.insert(bscore['meta'])
+        post_id = scoring.insert(bscore['scoring'])
+        post_id = four_factors.insert(bscore['four_factors'])
         if self.debug is True:
             print("Added {} to database...".format(post_id))
         return post_id
