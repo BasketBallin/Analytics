@@ -12,6 +12,7 @@ import ipdb
 class BoxScoreScraper(object):
 
     def __init__(self, mongo_client=None):
+        self.debug = False
         self.client = mongo_client
         self.base_url = 'http://www.basketball-reference.com'
 
@@ -284,8 +285,8 @@ class BoxScoreScraper(object):
         for link in links:
             #Check that game isnt already in database
             if self._check_game_exists(link):
-                if self.debug:
-                    print("Game Already Exists: {}".format(link))
+                #if self.debug:
+                #    print("Game Already Exists: {}".format(link))
                 continue #ID already exists
             bscore = self._get_boxscore(link)
 
